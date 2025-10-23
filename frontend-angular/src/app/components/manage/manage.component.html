@@ -1,0 +1,67 @@
+<div class="container">
+  <div class="header">
+    <div>
+      <h1>Manage QR Codes</h1>
+      <p>View and update your QR codes</p>
+    </div>
+    <a routerLink="/generate" class="btn btn-primary">Generate New QR</a>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">Loading...</div>
+  } @else if (qrCodes().length === 0) {
+    <div class="empty">
+      <p>No QR codes found. Create your first one!</p>
+      <a routerLink="/generate" class="btn btn-primary">Generate QR Code</a>
+    </div>
+  } @else {
+    <div class="grid">
+      @for (qr of qrCodes(); track qr.id) {
+        <div class="card">
+          <div class="qr-image">
+            <img [src]="qr.imageUrl" [alt]="qr.data" />
+          </div>
+
+          <div class="content">
+            <div class="field">
+              <label>Destination:</label>
+              @if (editingId() === qr.id) {
+                <div class="edit-form">
+                  <input
+                    type="text"
+                    [(ngModel)]="editData"
+                    class="form-input"
+                  />
+                  <div class="edit-buttons">
+                    <button (click)="saveEdit(qr.id)" class="btn btn-success">Save</button>
+                    <button (click)="cancelEdit()" class="btn btn-secondary">Cancel</button>
+                  </div>
+                </div>
+              } @else {
+                <p class="value">{{ qr.data }}</p>
+              }
+            </div>
+
+            <div class="field">
+              <label>Created:</label>
+              <p class="value">{{ formatDate(qr.createdAt) }}</p>
+            </div>
+
+            <div class="field">
+              <label>QR ID:</label>
+              <code class="value">{{ qr.id }}</code>
+            </div>
+
+            @if (editingId() !== qr.id) {
+              <div class="actions">
+                <button (click)="startEdit(qr)" class="btn btn-primary">Edit</button>
+                <a [routerLink]="['/analytics', qr.id]" class="btn btn-secondary">Analytics</a>
+                <button (click)="deleteQR(qr.id)" class="btn btn-danger">Delete</button>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

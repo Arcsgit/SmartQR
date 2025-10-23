@@ -1,0 +1,87 @@
+<div class="container">
+  <div class="header">
+    <a routerLink="/manage" class="back-link">← Back to Manage</a>
+    <h1>QR Code Analytics</h1>
+    <p>Track performance and insights for QR code: <code>{{ qrId }}</code></p>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">Loading analytics...</div>
+  } @else if (analytics()) {
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">{{ analytics()!.scanCount }}</div>
+        <div class="stat-label">Total Scans</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ analytics()!.uniqueIps }}</div>
+        <div class="stat-label">Unique IPs</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ getDeviceStatsArray()[0]?.count || 0 }}</div>
+        <div class="stat-label">{{ getDeviceStatsArray()[0]?.device || 'Mobile' }} Scans</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ analytics()!.scans.length }}</div>
+        <div class="stat-label">Total Events</div>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="card">
+      <h2>Scans Over Time</h2>
+      <div class="chart-container">
+        <canvas baseChart
+          [data]="lineChartData"
+          [options]="lineChartOptions"
+          type="line">
+        </canvas>
+      </div>
+    </div>
+
+    <!-- Device Stats -->
+    <div class="card">
+      <h2>Device Statistics</h2>
+      <div class="device-stats">
+        @for (stat of getDeviceStatsArray(); track stat.device) {
+          <div class="device-stat">
+            <span class="device-name">{{ stat.device }}</span>
+            <span class="device-count">{{ stat.count }} scans</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Recent Scans -->
+    <div class="card">
+      <h2>Recent Scans</h2>
+      @if (analytics()!.scans.length === 0) {
+        <p class="empty-message">No scans recorded yet</p>
+      } @else {
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Date & Time</th>
+                <th>Device</th>
+                <th>IP Address</th>
+                <th>Region</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (scan of analytics()!.scans.slice(0, 10); track scan.id) {
+                <tr>
+                  <td>{{ formatDate(scan.timestamp) }}</td>
+                  <td>{{ scan.deviceInfo || 'Unknown' }}</td>
+                  <td>{{ scan.ipAddress || 'Unknown' }}</td>
+                  <td>{{ scan.region || 'Unknown' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+</div>

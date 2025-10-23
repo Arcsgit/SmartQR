@@ -1,0 +1,81 @@
+<div class="container">
+  <div class="header">
+    <h1>Generate QR Code</h1>
+    <p>Enter a URL or text to create a trackable QR code</p>
+  </div>
+
+  <div class="card">
+    <form (ngSubmit)="generateQR()">
+      <div class="form-group">
+        <label for="data">URL or Text</label>
+        <input
+          type="text"
+          id="data"
+          [(ngModel)]="data"
+          name="data"
+          placeholder="https://example.com or your text"
+          [disabled]="loading()"
+        />
+      </div>
+      
+      <button
+        type="submit"
+        [disabled]="loading() || !data().trim()"
+        class="btn btn-primary"
+      >
+        {{ loading() ? 'Generating...' : 'Generate QR Code' }}
+      </button>
+    </form>
+  </div>
+
+  @if (qrResult()) {
+    <div class="result-card">
+      <h2>Your QR Code is Ready!</h2>
+      
+      <div class="qr-image">
+        <img [src]="qrResult()!.downloadUrl" alt="Generated QR Code" />
+      </div>
+      
+      <div class="info">
+        <div class="info-item">
+          <div class="info-label">QR ID</div>
+          <code class="info-value">{{ qrResult()!.qrId }}</code>
+        </div>
+        
+        <div class="info-item">
+          <div class="info-label">Scan URL (Trackable Link)</div>
+          <code class="info-value">{{ qrResult()!.scanUrl }}</code>
+        </div>
+        
+        <div class="info-item">
+          <div class="info-label">Image URL</div>
+          <code class="info-value">{{ qrResult()!.downloadUrl }}</code>
+        </div>
+      </div>
+      
+      <div class="buttons">
+        <button 
+          (click)="downloadQR()" 
+          [disabled]="downloading()"
+          class="btn btn-primary"
+        >
+          {{ downloading() ? '⏬ Downloading...' : '📥 Download Image' }}
+        </button>
+        <button (click)="copyScanUrl()" class="btn btn-secondary">
+          🔗 Copy Scan URL
+        </button>
+        <button (click)="copyImageUrl()" class="btn btn-secondary">
+          🖼️ Copy Image URL
+        </button>
+      </div>
+
+      <div class="info-box">
+        <strong>💡 What's the difference?</strong>
+        <ul>
+          <li><strong>Scan URL:</strong> The trackable link that redirects users (share this link or encode in QR)</li>
+          <li><strong>Image URL:</strong> Direct link to the QR code image file (for embedding in websites)</li>
+        </ul>
+      </div>
+    </div>
+  }
+</div>
