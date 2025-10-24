@@ -25,7 +25,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/qr")
-@CrossOrigin(origins = {"https://smartqr-code.onrender.com"},
+@CrossOrigin(origins = {"*"},
              allowedHeaders = "*",
              methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
 public class QRController {
