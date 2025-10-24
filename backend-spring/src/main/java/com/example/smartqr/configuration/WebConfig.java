@@ -8,6 +8,7 @@ import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
@@ -16,10 +17,8 @@ public class WebConfig implements WebMvcConfigurer {
     public CorsFilter corsFilter() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowCredentials(true);
-        corsConfiguration.setAllowedOrigins(Arrays.asList(
-            "http://localhost:4200",
-            "http://localhost:3000",
-            "http://localhost:5173"
+        corsConfiguration.setAllowedOrigins(List.of(
+                "https://smartqr-code.onrender.com"
         ));
         corsConfiguration.setAllowedHeaders(Arrays.asList(
             "Origin",
