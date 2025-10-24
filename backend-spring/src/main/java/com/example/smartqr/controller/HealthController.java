@@ -12,7 +12,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "https://smartqr-code.onrender.com")
+@CrossOrigin(origins = "*")
 public class HealthController {
     @GetMapping("/health")
     public ResponseEntity<Map<String, Object>> health() {
