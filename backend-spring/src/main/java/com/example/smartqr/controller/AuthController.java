@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = {"https://smartqr-code.onrender.com"})
+@CrossOrigin(origins = "https://smartqr-code.onrender.com")
 public class AuthController {
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
     private final AuthService authService;
