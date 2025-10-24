@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = {"http://localhost:4200", "*"},
+@CrossOrigin(origins = {"https://smartqr-code.onrender.com"},
              allowedHeaders = "*",
              methods = {RequestMethod.GET, RequestMethod.POST})
 public class AuthController {
