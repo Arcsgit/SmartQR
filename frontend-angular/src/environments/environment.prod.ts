@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://smartqr.onrender.com/api'
+  apiUrl: 'https://smartqr-service.onrender.com'
 };
