@@ -36,7 +36,7 @@
             class="toggle-password"
             (click)="togglePasswordVisibility()"
           >
-            {{ showPassword() ? '👁️' : '👁️‍🗨️' }}
+            <i [ngClass]="showPassword() ? 'fa fa-eye' : 'fa fa-eye-slash'"></i>
           </button>
         </div>
       </div>

@@ -4,7 +4,6 @@
       <h1>Manage QR Codes</h1>
       <p>View and update your QR codes</p>
     </div>
-    <a routerLink="/generate" class="btn btn-primary">Generate New QR</a>
   </div>
 
   @if (loading()) {
@@ -31,6 +30,7 @@
                     type="text"
                     [(ngModel)]="editData"
                     class="form-input"
+                    placeholder="Enter URL or text"
                   />
                   <div class="edit-buttons">
                     <button (click)="saveEdit(qr.id)" class="btn btn-success">Save</button>
@@ -38,18 +38,39 @@
                   </div>
                 </div>
               } @else {
-                <p class="value">{{ qr.data }}</p>
+                <div class="url-container">
+                  <p 
+                    class="url-value" 
+                    [class.expanded]="isUrlExpanded(qr.id)"
+                    [title]="qr.data"
+                  >
+                    {{ isUrlExpanded(qr.id) ? qr.data : truncateUrl(qr.data) }}
+                  </p>
+                  <div class="url-actions">
+                    @if (qr.data.length > 50) {
+                      <button 
+                        (click)="toggleUrlExpand(qr.id)" 
+                        class="expand-btn"
+                        [title]="isUrlExpanded(qr.id) ? 'Collapse' : 'Expand'"
+                      >
+                        {{ isUrlExpanded(qr.id) ? '▲' : '▼' }}
+                      </button>
+                    }
+                    <button 
+                      (click)="copyUrl(qr.data)" 
+                      class="copy-btn"
+                      title="Copy full URL"
+                    >
+                      📋
+                    </button>
+                  </div>
+                </div>
               }
             </div>
 
             <div class="field">
               <label>Created:</label>
               <p class="value">{{ formatDate(qr.createdAt) }}</p>
-            </div>
-
-            <div class="field">
-              <label>QR ID:</label>
-              <code class="value">{{ qr.id }}</code>
             </div>
 
             @if (editingId() !== qr.id) {

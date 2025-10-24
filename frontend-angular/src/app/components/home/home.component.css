@@ -64,6 +64,7 @@
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 2rem;
   margin: 4rem 0;
+  margin-top: 1rem;
 }
 
 .feature-card {
@@ -72,6 +73,8 @@
   border-radius: 0.5rem;
   border: 1px solid #e5e7eb;
   transition: all 0.2s;
+  text-align: center;
+  padding-bottom: 1rem;
 }
 
 .feature-card:hover {

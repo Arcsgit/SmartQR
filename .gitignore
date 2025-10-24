@@ -1,0 +1,75 @@
+# Backend (Spring Boot)
+backend-spring/target/
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# Spring specific
+backend-spring/.apt_generated
+backend-spring/.classpath
+backend-spring/.factorypath
+backend-spring/.project
+backend-spring/.settings
+backend-spring/.springBeans
+backend-spring/.sts4-cache
+
+# Frontend (Angular)
+frontend-angular/dist
+frontend-angular/tmp
+frontend-angular/out-tsc
+frontend-angular/bazel-out
+
+# Node
+frontend-angular/node_modules
+frontend-angular/npm-debug.log
+frontend-angular/yarn-error.log
+
+# Angular specific
+frontend-angular/.angular/cache
+frontend-angular/.sass-cache/
+frontend-angular/connect.lock
+frontend-angular/coverage
+frontend-angular/libpeerconnection.log
+frontend-angular/testem.log
+frontend-angular/typings
+
+# IDEs and editors
+.idea
+*.iws
+*.iml
+*.ipr
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# System files
+.DS_Store
+Thumbs.db
+*.swp
+
+# Logs
+*.log
+logs/

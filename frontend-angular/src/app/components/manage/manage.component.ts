@@ -13,7 +13,6 @@ import { ToastrService } from 'ngx-toastr';
   templateUrl: './manage.component.html',
   styleUrl: './manage.component.css'
 })
-
 export class ManageComponent implements OnInit {
   private qrService = inject(QrCodeService);
   private toastr = inject(ToastrService);
@@ -99,4 +98,36 @@ export class ManageComponent implements OnInit {
       minute: '2-digit'
     });
   }
+
+  // 🔥 NEW: Truncate long URLs
+  truncateUrl(url: string, maxLength: number = 50): string {
+    if (url.length <= maxLength) {
+      return url;
+    }
+    return url.substring(0, maxLength) + '...';
+  }
+
+  // 🔥 NEW: Copy URL to clipboard
+  copyUrl(url: string) {
+    navigator.clipboard.writeText(url);
+    this.toastr.success('URL copied to clipboard!');
+  }
+  expandedUrls = signal<Set<string>>(new Set());
+
+toggleUrlExpand(qrId: string) {
+  this.expandedUrls.update(urls => {
+    const newUrls = new Set(urls);
+    if (newUrls.has(qrId)) {
+      newUrls.delete(qrId);
+    } else {
+      newUrls.add(qrId);
+    }
+    return newUrls;
+  });
+}
+
+isUrlExpanded(qrId: string): boolean {
+  return this.expandedUrls().has(qrId);
+}
+
 }

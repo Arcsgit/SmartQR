@@ -8,7 +8,7 @@
         <a routerLink="/manage" class="btn btn-secondary">View QR Codes</a>
       } @else {
         <a routerLink="/signup" class="btn btn-primary">Get Started Free</a>
-        <a routerLink="/login" class="btn btn-secondary">Sign In</a>
+        <!-- <a routerLink="/login" class="btn btn-secondary">Sign In</a> -->
       }
     </div>
   </div>
@@ -18,11 +18,11 @@
       <div class="feature-card">
         <h3>{{feature.title}}</h3>
         <p>{{feature.description}}</p>
-        @if (authService.isAuthenticated()) {
+        <!-- @if (authService.isAuthenticated()) {
           <a [routerLink]="feature.link" class="learn-more">Get Started →</a>
         } @else {
           <a routerLink="/signup" class="learn-more">Sign up to use →</a>
-        }
+        } -->
       </div>
     }
   </div>
