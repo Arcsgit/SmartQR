@@ -38,7 +38,7 @@ RUN apt-get update && \
 RUN groupadd -r spring && useradd -r -g spring spring
 
 # Copy JAR from build stage
-COPY --from=build --chown=spring:spring /app/target/smartqr-0.0.1-SNAPSHOT.jar smartqr.jar
+COPY --from=build --chown=spring:spring /app/target/backend-spring-0.0.1-SNAPSHOT.jar backend-spring.jar
 
 # Switch to non-root user
 USER spring:spring
@@ -51,4 +51,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:8080/api/health || exit 1
 
 # Run application (FIXED: was "jala" and "demo.jar")
-ENTRYPOINT ["java", "-jar", "smartqr.jar"]
+ENTRYPOINT ["java", "-jar", "backend-spring.jar"]
