@@ -1,6 +1,7 @@
 package com.example.smartqr.controller;
 
 import com.example.smartqr.dto.*;
+import com.example.smartqr.exception.ResourceNotFoundException;
 import com.example.smartqr.model.QRCode;
 import com.example.smartqr.service.QRCodeService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -159,15 +160,20 @@ public class QRController {
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<String>> deleteQRCode(@PathVariable UUID id) {
         try {
-            log.info("Delete QR code request received for ID: {}", id);
+            log.info("Delete request for QR ID: {}", id);
             qrCodeService.deleteQRCode(id);
             return ResponseEntity.ok(ApiResponse.success("QR Code deleted successfully"));
+        } catch (ResourceNotFoundException e) {
+            log.error("QR Code not found or access denied: {}", id, e);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(e.getMessage()));
         } catch (Exception e) {
             log.error("Error deleting QR code: {}", id, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error("Failed to delete QR code: " + e.getMessage()));
         }
     }
+
 
     /**
      * Download QR code image (bypasses CORS issues)

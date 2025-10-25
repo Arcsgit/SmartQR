@@ -12,12 +12,12 @@ import { ToastrService } from 'ngx-toastr';
   templateUrl: './generate.component.html',
   styleUrl: './generate.component.css'
 })
-
 export class GenerateComponent {
   private qrService = inject(QrCodeService);
   private toastr = inject(ToastrService);
 
   data = signal('');
+  name = signal('');
   loading = signal(false);
   qrResult = signal<QRGenerateResponse | null>(null);
   downloading = signal(false);
@@ -29,11 +29,16 @@ export class GenerateComponent {
     }
 
     this.loading.set(true);
-    this.qrService.generateQR({ data: this.data() }).subscribe({
+    
+    this.qrService.generateQR({ 
+      data: this.data(),
+      name: this.name().trim() || undefined
+    }).subscribe({
       next: (response) => {
         this.qrResult.set(response.data);
         this.toastr.success('QR Code generated successfully!');
         this.data.set('');
+        this.name.set('');
         this.loading.set(false);
       },
       error: (error) => {
@@ -44,53 +49,35 @@ export class GenerateComponent {
     });
   }
 
-  // ✅ FIXED: Proper download function
   async downloadQR() {
     if (!this.qrResult()) return;
     
     this.downloading.set(true);
-    const imageUrl = this.qrResult()!.downloadUrl;
-    const fileName = `smartqr-${this.qrResult()!.qrId}.png`;
+    const qrId = this.qrResult()!.qrId;
     
-    try {
-      // Fetch the image as blob
-      const response = await fetch(imageUrl);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch image');
+    this.qrService.downloadQRImage(qrId).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `smartqr-${qrId}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        
+        this.toastr.success('QR Code downloaded!');
+        this.downloading.set(false);
+      },
+      error: (error) => {
+        console.error('Download failed:', error);
+        this.toastr.error('Download failed. Opening in new tab.');
+        window.open(this.qrResult()!.downloadUrl, '_blank');
+        this.downloading.set(false);
       }
-      
-      const blob = await response.blob();
-      
-      // Create a temporary URL for the blob
-      const blobUrl = window.URL.createObjectURL(blob);
-      
-      // Create a temporary anchor element
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = fileName;
-      
-      // Append to body, click, and remove
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      // Clean up the blob URL
-      window.URL.revokeObjectURL(blobUrl);
-      
-      this.toastr.success('QR Code downloaded successfully!');
-      this.downloading.set(false);
-      
-    } catch (error) {
-      console.error('Download failed:', error);
-      this.toastr.error('Failed to download QR code. Opening in new tab instead.');
-      // Fallback: open in new tab
-      window.open(imageUrl, '_blank');
-      this.downloading.set(false);
-    }
+    });
   }
 
-  // Copy QR Image URL
   copyImageUrl() {
     if (this.qrResult()) {
       navigator.clipboard.writeText(this.qrResult()!.downloadUrl);
@@ -98,7 +85,6 @@ export class GenerateComponent {
     }
   }
 
-  // Copy Scan URL
   copyScanUrl() {
     if (this.qrResult()) {
       navigator.clipboard.writeText(this.qrResult()!.scanUrl);

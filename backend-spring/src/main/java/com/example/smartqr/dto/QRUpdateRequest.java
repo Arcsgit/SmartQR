@@ -8,11 +8,14 @@ public class QRUpdateRequest {
     @Size(max = 2000, message = "Data cannot exceed 2000 characters")
     private String data;
 
+    private String name;
+
     public QRUpdateRequest() {
     }
 
-    public QRUpdateRequest(String data) {
+    public QRUpdateRequest(String data, String name) {
         this.data = data;
+        this.name = name;
     }
 
     public String getData() {
@@ -23,10 +26,19 @@ public class QRUpdateRequest {
         this.data = data;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     @Override
     public String toString() {
         return "QRUpdateRequest{" +
                 "data='" + data + '\'' +
+                ", name='" + name + '\'' +
                 '}';
     }
 }

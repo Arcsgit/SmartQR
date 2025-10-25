@@ -2,11 +2,13 @@ export interface QRCode {
   id: string;
   data: string;
   imageUrl: string;
+  name?: string;
   createdAt: string;
 }
 
 export interface QRGenerateRequest {
   data: string;
+  name?: string;
 }
 
 export interface QRGenerateResponse {
@@ -17,6 +19,7 @@ export interface QRGenerateResponse {
 
 export interface QRUpdateRequest {
   data: string;
+  name?: string;
 }
 
 export interface ApiResponse<T> {

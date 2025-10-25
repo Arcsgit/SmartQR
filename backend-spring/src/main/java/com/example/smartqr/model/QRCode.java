@@ -12,7 +12,6 @@ import java.util.UUID;
 @Table
 public class QRCode {
     @Id
-    @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
     @Column(nullable = false, columnDefinition = "TEXT")
@@ -20,6 +19,10 @@ public class QRCode {
 
     @Column(name = "image_url", nullable = false, columnDefinition = "TEXT")
     private String imageUrl;
+
+    // 🔥 NEW: Add custom name
+    @Column(name = "name", length = 100)
+    private String name;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -29,25 +32,37 @@ public class QRCode {
     @JsonIgnore
     private User user;
 
-    public QRCode() {
-    }
-
-    public QRCode(UUID id, String data, String imageUrl, LocalDateTime createdAt, User user) {
-        this.id = id;
-        this.data = data;
-        this.imageUrl = imageUrl;
-        this.createdAt = createdAt;
-        this.user = user;
-    }
-
     @PrePersist
     protected void onCreate() {
         if (createdAt == null) {
             createdAt = LocalDateTime.now();
         }
-        if (id == null) {
-            id = UUID.randomUUID();
+        // Auto-generate name if not provided
+        if (name == null || name.isEmpty()) {
+            name = generateNameFromData();
         }
+    }
+
+    private String generateNameFromData() {
+        try {
+            java.net.URL url = new java.net.URL(data);
+            String host = url.getHost().replace("www.", "");
+            return host.length() > 30 ? host.substring(0, 30) : host;
+        } catch (Exception e) {
+            return data.length() > 30 ? data.substring(0, 30) + "..." : data;
+        }
+    }
+
+    public QRCode() {
+    }
+
+    public QRCode(UUID id, String data, String imageUrl, String name, LocalDateTime createdAt, User user) {
+        this.id = id;
+        this.data = data;
+        this.imageUrl = imageUrl;
+        this.name = name;
+        this.createdAt = createdAt;
+        this.user = user;
     }
 
     public UUID getId() {
@@ -74,6 +89,14 @@ public class QRCode {
         this.imageUrl = imageUrl;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -96,6 +119,7 @@ public class QRCode {
                 "id=" + id +
                 ", data='" + data + '\'' +
                 ", imageUrl='" + imageUrl + '\'' +
+                ", name='" + name + '\'' +
                 ", createdAt=" + createdAt +
                 ", user=" + user +
                 '}';
@@ -105,11 +129,11 @@ public class QRCode {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         QRCode qrCode = (QRCode) o;
-        return Objects.equals(id, qrCode.id) && Objects.equals(data, qrCode.data) && Objects.equals(imageUrl, qrCode.imageUrl) && Objects.equals(createdAt, qrCode.createdAt) && Objects.equals(user, qrCode.user);
+        return Objects.equals(id, qrCode.id) && Objects.equals(data, qrCode.data) && Objects.equals(imageUrl, qrCode.imageUrl) && Objects.equals(name, qrCode.name) && Objects.equals(createdAt, qrCode.createdAt) && Objects.equals(user, qrCode.user);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, data, imageUrl, createdAt, user);
+        return Objects.hash(id, data, imageUrl, name, createdAt, user);
     }
 }

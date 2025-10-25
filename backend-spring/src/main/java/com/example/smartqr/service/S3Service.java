@@ -8,13 +8,15 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.core.sync.ResponseTransformer;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 @Service
 public class S3Service {
@@ -89,4 +91,21 @@ public class S3Service {
             throw new RuntimeException("Failed to delete file from S3", e);
         }
     }
+
+    public byte[] downloadFile(String fileName) throws IOException {
+        try {
+            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(fileName)
+                    .build();
+
+            ResponseBytes<GetObjectResponse> objectBytes = s3Client.getObject(getObjectRequest, ResponseTransformer.toBytes());
+            return objectBytes.asByteArray();
+
+        } catch (S3Exception e) {
+            log.error("Failed to download file from S3: {}", fileName, e);
+            throw new IOException("Failed to download file: " + e.getMessage(), e);
+        }
+    }
+
 }

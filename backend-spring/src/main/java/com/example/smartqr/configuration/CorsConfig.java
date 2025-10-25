@@ -15,28 +15,6 @@ public class CorsConfig {
     @Value("${app.cors.allowed-origins:*}")
     private String allowedOrigins;
 
-//    @Bean
-//    public CorsFilter corsFilter() {
-//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        CorsConfiguration config = new CorsConfiguration();
-//
-//        // Allow credentials
-//        config.setAllowCredentials(true);
-//
-//        // Set allowed origins
-//        String[] origins = allowedOrigins.split(",");
-//        config.setAllowedOriginPatterns(Arrays.asList(origins));
-//
-//        // Allow all headers
-//        config.addAllowedHeader("*");
-//
-//        // Allow all methods
-//        config.addAllowedMethod("*");
-//
-//        source.registerCorsConfiguration("/**", config);
-//        return new CorsFilter();
-//    }
-
     @Bean
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
