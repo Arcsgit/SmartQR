@@ -30,7 +30,6 @@ public class JwtTokenProvider {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpiration);
-
         return Jwts.builder()
                 .subject(userDetails.getUsername())
                 .issuedAt(now)

@@ -23,10 +23,6 @@ public class AuthController {
         this.authService = authService;
     }
 
-    /**
-     * User signup
-     * POST /api/auth/signup
-     */
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<AuthResponse>> signup(@Valid @RequestBody SignupRequest request) {
         try {
@@ -40,10 +36,6 @@ public class AuthController {
         }
     }
 
-    /**
-     * User login
-     * POST /api/auth/login
-     */
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
         try {
@@ -57,13 +49,8 @@ public class AuthController {
         }
     }
 
-    /**
-     * Get current user info (test if token is valid)
-     * GET /api/auth/me
-     */
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<Object>> getCurrentUser() {
-        // This endpoint is protected, so if we reach here, token is valid
         return ResponseEntity.ok(ApiResponse.success("Token is valid"));
     }
 }

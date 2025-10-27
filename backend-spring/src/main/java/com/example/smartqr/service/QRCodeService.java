@@ -60,9 +60,6 @@ public class QRCodeService {
         this.s3Service = s3Service;
     }
 
-    /**
-     * Get currently authenticated user
-     */
     private User getCurrentUser() {
         try {
             UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext()
@@ -75,20 +72,13 @@ public class QRCodeService {
         }
     }
 
-    /**
-     * Generate QR code (linked to current user)
-     */
     @Transactional
     public QRGenerateResponse generateQR(QRGenerateRequest request) {
         try {
             User currentUser = getCurrentUser();
-
             UUID qrId = UUID.randomUUID();
             String scanUrl = baseUrl + "/api/qr/scan/" + qrId;
-
             log.info("Generating QR code for user: {}", currentUser.getEmail());
-
-            // Generate QR code image
             QRCodeWriter qrCodeWriter = new QRCodeWriter();
             BitMatrix bitMatrix = qrCodeWriter.encode(
                     scanUrl,
@@ -103,7 +93,6 @@ public class QRCodeService {
             String fileName = qrId + ".png";
             String imageUrl = s3Service.uploadFile(fileName, outputStream);
 
-            // Save to database
             QRCode qrCode = new QRCode();
             qrCode.setId(qrId);
             qrCode.setData(request.getData());
@@ -111,66 +100,43 @@ public class QRCodeService {
             qrCode.setUser(currentUser);
             qrCode.setCreatedAt(LocalDateTime.now());
 
-            // 🔥 NEW: Set custom name or auto-generate
-            if (request.getName() != null && !request.getName().trim().isEmpty()) {
+            if (request.getName() != null && !request.getName().trim().isEmpty())
                 qrCode.setName(request.getName().trim());
-            }
-            // Otherwise @PrePersist will auto-generate
-
             qrCodeRepository.save(qrCode);
 
             log.info("QR Code generated: {}", qrId);
             return new QRGenerateResponse(qrId, imageUrl, scanUrl);
-
         } catch (WriterException | IOException e) {
             log.error("Failed to generate QR code", e);
             throw new RuntimeException("Failed to generate QR code: " + e.getMessage(), e);
         }
     }
 
-
-    /**
-     * Update QR code (only if belongs to current user)
-     */
     @Transactional
     public void updateQR(UUID id, QRUpdateRequest request) {
         User currentUser = getCurrentUser();
-
         QRCode qrCode = qrCodeRepository.findByIdAndUser(id, currentUser)
                 .orElseThrow(() -> new ResourceNotFoundException("QR Code not found or access denied"));
-
         qrCode.setData(request.getData());
-
-        // 🔥 NEW: Update name if provided
-        if (request.getName() != null) {
+        if (request.getName() != null)
             qrCode.setName(request.getName().trim());
-        }
-
         qrCodeRepository.save(qrCode);
-
         log.info("QR Code updated: {}", id);
     }
 
-
-    /**
-     * Handle QR scan (public - no auth required)
-     */
     @Transactional
     public String handleScan(UUID id, HttpServletRequest request) {
         log.info("=== Handling scan for QR ID: {} ===", id);
-
         try {
             QRCode qrCode = qrCodeRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("QR Code not found"));
 
-            // Get client information
             String ipAddress = getClientIp(request);
             String deviceInfo = request.getHeader("User-Agent");
             String region = determineRegionFromIP(ipAddress);
 
             log.info("Scan from IP: {}, Region: {}", ipAddress, region);
 
-            // Save analytics
             QRAnalytics analytics = new QRAnalytics();
             analytics.setQrId(id);
             analytics.setTimestamp(LocalDateTime.now());
@@ -180,33 +146,23 @@ public class QRCodeService {
 
             analyticsRepository.save(analytics);
 
-            // Prepare redirect URL
             String targetUrl = qrCode.getData();
-            if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
+            if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://"))
                 targetUrl = "https://" + targetUrl;
-            }
-
             log.info("Redirecting to: {}", targetUrl);
             return targetUrl;
-
         } catch (Exception e) {
             log.error("Error handling scan", e);
             throw new RuntimeException("Failed to process QR scan: " + e.getMessage(), e);
         }
     }
 
-    /**
-     * Get analytics (only for user's own QR codes)
-     */
     public AnalyticsResponse getAnalytics(UUID qrId) {
         User currentUser = getCurrentUser();
 
-        // Verify user owns this QR code
         qrCodeRepository.findByIdAndUser(qrId, currentUser)
                 .orElseThrow(() -> new ResourceNotFoundException("QR Code not found or access denied"));
-
         List<QRAnalytics> scans = analyticsRepository.findByQrIdOrderByTimestampDesc(qrId);
-
         int scanCount = scans.size();
         long uniqueIps = scans.stream()
                 .map(QRAnalytics::getIpAddress)
@@ -226,13 +182,9 @@ public class QRCodeService {
                 ));
 
         log.info("Analytics fetched by user: {} for QR: {}", currentUser.getEmail(), qrId);
-
         return new AnalyticsResponse(scanCount, (int) uniqueIps, scans, deviceStats, dailyScans);
     }
 
-    /**
-     * Get all QR codes for current user
-     */
     public List<QRCode> getAllQRCodes() {
         User currentUser = getCurrentUser();
         List<QRCode> qrCodes = qrCodeRepository.findByUserOrderByCreatedAtDesc(currentUser);
@@ -240,27 +192,19 @@ public class QRCodeService {
         return qrCodes;
     }
 
-    /**
-     * Get single QR code (only if belongs to current user)
-     */
     public QRCode getQRCode(UUID id) {
         User currentUser = getCurrentUser();
         return qrCodeRepository.findByIdAndUser(id, currentUser)
                 .orElseThrow(() -> new ResourceNotFoundException("QR Code not found or access denied"));
     }
 
-    /**
-     * Delete QR code (only if belongs to current user)
-     */
     @Transactional
     public void deleteQRCode(UUID id) {
         log.info("Attempting to delete QR code: {}", id);
-
         try {
             User currentUser = getCurrentUser();
             log.info("Current user: {} ({})", currentUser.getEmail(), currentUser.getId());
 
-            // Find QR code
             QRCode qrCode = qrCodeRepository.findById(id)
                     .orElseThrow(() -> {
                         log.error("QR Code not found: {}", id);
@@ -271,14 +215,12 @@ public class QRCodeService {
                     qrCode.getUser().getEmail(),
                     qrCode.getUser().getId());
 
-            // Check ownership
             if (!qrCode.getUser().getId().equals(currentUser.getId())) {
                 log.error("Access denied. QR {} belongs to user {}, but current user is {}",
                         id, qrCode.getUser().getEmail(), currentUser.getEmail());
                 throw new ResourceNotFoundException("Access denied - QR Code belongs to another user");
             }
 
-            // Delete from S3
             try {
                 String fileName = id + ".png";
                 s3Service.deleteFile(fileName);
@@ -287,10 +229,8 @@ public class QRCodeService {
                 log.warn("Failed to delete S3 file for QR: {}. Continuing with database deletion.", id, e);
             }
 
-            // Delete from database
             qrCodeRepository.delete(qrCode);
             log.info("QR Code deleted successfully: {}", id);
-
         } catch (ResourceNotFoundException e) {
             throw e;
         } catch (Exception e) {
@@ -300,60 +240,42 @@ public class QRCodeService {
     }
 
 
-    // ============= HELPER METHODS (unchanged) =============
-
     private String getClientIp(HttpServletRequest request) {
         String ipAddress = request.getHeader("X-Forwarded-For");
-
-        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
+        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress))
             ipAddress = request.getHeader("X-Real-IP");
-        }
-
-        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
+        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress))
             ipAddress = request.getRemoteAddr();
-        }
-
-        if (ipAddress != null && ipAddress.contains(",")) {
+        if (ipAddress != null && ipAddress.contains(","))
             ipAddress = ipAddress.split(",")[0].trim();
-        }
-
         return ipAddress;
     }
 
     private String determineRegionFromIP(String ipAddress) {
-        if (isPrivateIP(ipAddress)) {
+        if (isPrivateIP(ipAddress))
             return "Local/Private Network";
-        }
-
-        if (ipinfoToken == null || ipinfoToken.isEmpty()) {
+        if (ipinfoToken == null || ipinfoToken.isEmpty())
             return "Unknown (No API Key)";
-        }
 
         try {
             String apiUrl = "https://ipinfo.io/" + ipAddress + "?token=" + ipinfoToken;
-
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(apiUrl))
                     .timeout(java.time.Duration.ofSeconds(5))
                     .GET()
                     .build();
-
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
             if (response.statusCode() == 200) {
                 JsonNode json = objectMapper.readTree(response.body());
-
-                if (json.has("error")) {
+                if (json.has("error"))
                     return "Unknown (API Error)";
-                }
 
                 String city = json.has("city") ? json.get("city").asText() : "";
                 String region = json.has("region") ? json.get("region").asText() : "";
                 String country = json.has("country") ? json.get("country").asText() : "";
 
-                if (country.isEmpty()) {
+                if (country.isEmpty())
                     country = json.has("country_code") ? json.get("country_code").asText() : "";
-                }
 
                 List<String> parts = new ArrayList<>();
                 if (!city.isEmpty()) parts.add(city);
@@ -361,12 +283,10 @@ public class QRCodeService {
                 if (!country.isEmpty()) parts.add(country);
 
                 String result = parts.isEmpty() ? "Unknown Location" : String.join(", ", parts);
-                log.info("✅ IP {} → {}", ipAddress, result);
+                log.info("IP {} → {}", ipAddress, result);
                 return result;
             }
-
             return "Unknown (API Error)";
-
         } catch (Exception e) {
             log.error("Error resolving IP: {}", ipAddress, e);
             return "Unknown (Error)";
@@ -383,21 +303,14 @@ public class QRCodeService {
     }
 
     private String parseDevice(String userAgent) {
-        if (userAgent == null || userAgent.isEmpty()) {
+        if (userAgent == null || userAgent.isEmpty())
             return "Unknown";
-        }
 
         String ua = userAgent.toLowerCase();
-
-        if (ua.contains("bot") || ua.contains("crawler")) {
-            return "Bot";
-        } else if (ua.contains("mobile") || ua.contains("android") || ua.contains("iphone")) {
-            return "Mobile";
-        } else if (ua.contains("tablet") || ua.contains("ipad")) {
-            return "Tablet";
-        } else {
-            return "Desktop";
-        }
+        if (ua.contains("bot") || ua.contains("crawler")) return "Bot";
+        else if (ua.contains("mobile") || ua.contains("android") || ua.contains("iphone")) return "Mobile";
+        else if (ua.contains("tablet") || ua.contains("ipad")) return "Tablet";
+        else return "Desktop";
     }
 
     public String testRegionDetection(String ipAddress) {

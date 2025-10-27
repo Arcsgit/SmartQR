@@ -4,7 +4,6 @@ import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -54,22 +53,17 @@ public class S3Service {
     public String uploadFile(String fileName, ByteArrayOutputStream outputStream) {
         try {
             byte[] bytes = outputStream.toByteArray();
-
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                     .bucket(bucketName)
                     .key(fileName)
                     .contentType("image/png")
                     .contentLength((long) bytes.length)
                     .build();
-
             s3Client.putObject(putObjectRequest, RequestBody.fromBytes(bytes));
-
             String imageUrl = String.format("https://%s.s3.%s.amazonaws.com/%s",
                     bucketName, region, fileName);
-
             log.info("File uploaded successfully: {}", imageUrl);
             return imageUrl;
-
         } catch (Exception e) {
             log.error("Failed to upload file to S3: {}", fileName, e);
             throw new RuntimeException("Failed to upload file to S3", e);
@@ -82,10 +76,8 @@ public class S3Service {
                     .bucket(bucketName)
                     .key(fileName)
                     .build();
-
             s3Client.deleteObject(deleteObjectRequest);
             log.info("File deleted successfully: {}", fileName);
-
         } catch (Exception e) {
             log.error("Failed to delete file from S3: {}", fileName, e);
             throw new RuntimeException("Failed to delete file from S3", e);
@@ -98,14 +90,11 @@ public class S3Service {
                     .bucket(bucketName)
                     .key(fileName)
                     .build();
-
             ResponseBytes<GetObjectResponse> objectBytes = s3Client.getObject(getObjectRequest, ResponseTransformer.toBytes());
             return objectBytes.asByteArray();
-
         } catch (S3Exception e) {
             log.error("Failed to download file from S3: {}", fileName, e);
             throw new IOException("Failed to download file: " + e.getMessage(), e);
         }
     }
-
 }

@@ -21,7 +21,6 @@ public class HealthController {
         response.put("timestamp", LocalDateTime.now());
         response.put("service", "SmartQR Backend");
         response.put("version", "1.0.0");
-
         return ResponseEntity.ok(response);
     }
 }

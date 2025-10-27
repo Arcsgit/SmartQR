@@ -30,12 +30,9 @@ public class AuthService {
     }
 
     public AuthResponse signup(SignupRequest request) {
-        // Check if email already exists
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (userRepository.existsByEmail(request.getEmail()))
             throw new RuntimeException("Email already registered");
-        }
 
-        // Create new user
         User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
@@ -45,13 +42,10 @@ public class AuthService {
         User savedUser = userRepository.save(user);
         log.info("New user registered: {}", savedUser.getEmail());
 
-        // Auto-login after signup
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
-
         String token = tokenProvider.generateToken(authentication);
-
         return new AuthResponse(token, savedUser.getId(), savedUser.getEmail(), savedUser.getName());
     }
 
@@ -59,14 +53,10 @@ public class AuthService {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
-
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
         String token = tokenProvider.generateToken(authentication);
-
         log.info("User logged in: {}", user.getEmail());
-
         return new AuthResponse(token, user.getId(), user.getEmail(), user.getName());
     }
 }

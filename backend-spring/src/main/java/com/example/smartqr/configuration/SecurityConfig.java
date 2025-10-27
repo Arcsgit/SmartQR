@@ -37,26 +37,22 @@ public class SecurityConfig {
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Public endpoints (no authentication required)
                 .requestMatchers(
-                    "/api/auth/**",           // Login & Signup
-                    "/api/qr/scan/**",        // QR Scanning (public)
-                    "/api/health",            // Health check
-                    "/api/qr/test-location"   // Test endpoint
+                        "/api/auth/**",
+                    "/api/qr/scan/**",
+                    "/api/health",
+                    "/api/qr/test-location"
                 ).permitAll()
-                // All other endpoints require authentication
                 .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider())
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
     }
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
-//        authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }

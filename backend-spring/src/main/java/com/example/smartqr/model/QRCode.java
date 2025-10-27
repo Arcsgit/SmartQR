@@ -20,7 +20,6 @@ public class QRCode {
     @Column(name = "image_url", nullable = false, columnDefinition = "TEXT")
     private String imageUrl;
 
-    // 🔥 NEW: Add custom name
     @Column(name = "name", length = 100)
     private String name;
 

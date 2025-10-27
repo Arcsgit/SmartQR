@@ -30,21 +30,15 @@ import java.util.UUID;
              allowedHeaders = "*",
              methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
 public class QRController {
-
     private static final Logger log = LoggerFactory.getLogger(QRController.class);
     private final QRCodeService qrCodeService;
 
     public QRController(QRCodeService qrCodeService) {
         this.qrCodeService = qrCodeService;
     }
-    /**
-     * Generate a new QR code
-     * POST /api/qr/generate
-     */
-    @PostMapping("/generate")
-    public ResponseEntity<ApiResponse<QRGenerateResponse>> generateQR(
-            @Valid @RequestBody QRGenerateRequest request) {
 
+    @PostMapping("/generate")
+    public ResponseEntity<ApiResponse<QRGenerateResponse>> generateQR(@Valid @RequestBody QRGenerateRequest request) {
         try {
             log.info("Generate QR request received for data: {}", request.getData());
             QRGenerateResponse response = qrCodeService.generateQR(request);
@@ -56,15 +50,8 @@ public class QRController {
         }
     }
 
-    /**
-     * Update an existing QR code's destination
-     * POST /api/qr/update/{id}
-     */
     @PostMapping("/update/{id}")
-    public ResponseEntity<ApiResponse<String>> updateQR(
-            @PathVariable UUID id,
-            @Valid @RequestBody QRUpdateRequest request) {
-
+    public ResponseEntity<ApiResponse<String>> updateQR(@PathVariable UUID id, @Valid @RequestBody QRUpdateRequest request) {
         try {
             log.info("Update QR request received for ID: {}", id);
             qrCodeService.updateQR(id, request);
@@ -76,36 +63,19 @@ public class QRController {
         }
     }
 
-    /**
-     * Scan QR code - tracks analytics and redirects to destination
-     * GET /api/qr/scan/{id}
-     */
     @GetMapping("/scan/{id}")
-    public void scanQR(
-            @PathVariable("id") UUID id,
-            HttpServletRequest request,
-            HttpServletResponse response) throws IOException {
-
+    public void scanQR(@PathVariable("id") UUID id, HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             log.info("Scan request received for QR ID: {}", id);
-
             String targetUrl = qrCodeService.handleScan(id, request);
-
             log.info("Redirecting to URL: {}", targetUrl);
-
-            // Send redirect
             response.sendRedirect(targetUrl);
-
         } catch (Exception e) {
             log.error("Error handling QR scan for ID: {}", id, e);
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "QR Code not found or invalid");
         }
     }
 
-    /**
-     * Get analytics for a QR code
-     * GET /api/qr/analytics/{id}
-     */
     @GetMapping("/analytics/{id}")
     public ResponseEntity<ApiResponse<AnalyticsResponse>> getAnalytics(@PathVariable UUID id) {
         try {
@@ -119,10 +89,6 @@ public class QRController {
         }
     }
 
-    /**
-     * Get all QR codes
-     * GET /api/qr/all
-     */
     @GetMapping("/all")
     public ResponseEntity<ApiResponse<List<QRCode>>> getAllQRCodes() {
         try {
@@ -136,10 +102,6 @@ public class QRController {
         }
     }
 
-    /**
-     * Get a single QR code by ID
-     * GET /api/qr/{id}
-     */
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<QRCode>> getQRCode(@PathVariable UUID id) {
         try {
@@ -153,10 +115,6 @@ public class QRController {
         }
     }
 
-    /**
-     * Delete a QR code
-     * DELETE /api/qr/{id}
-     */
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<String>> deleteQRCode(@PathVariable UUID id) {
         try {
@@ -174,26 +132,17 @@ public class QRController {
         }
     }
 
-
-    /**
-     * Download QR code image (bypasses CORS issues)
-     * GET /api/qr/download/{id}
-     */
     @GetMapping("/download/{id}")
     public ResponseEntity<byte[]> downloadQRCode(@PathVariable UUID id) {
         try {
             log.info("Download request for QR ID: {}", id);
-
-            // Get QR code from database
             QRCode qrCode = qrCodeService.getQRCode(id);
 
-            // Fetch image from S3 URL
             URL url = new URL(qrCode.getImageUrl());
             InputStream inputStream = url.openStream();
             byte[] imageBytes = inputStream.readAllBytes();
             inputStream.close();
 
-            // Set headers for download
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.IMAGE_PNG);
             headers.setContentDisposition(
@@ -207,7 +156,6 @@ public class QRController {
 
             log.info("QR Code download successful: {}", id);
             return new ResponseEntity<>(imageBytes, headers, HttpStatus.OK);
-
         } catch (Exception e) {
             log.error("Failed to download QR code: {}", id, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -215,15 +163,8 @@ public class QRController {
         }
     }
 
-    /**
-     * Test IP geolocation (for debugging)
-     * GET /api/qr/test-location?ip=8.8.8.8
-     */
     @GetMapping("/test-location")
-    public ResponseEntity<Map<String, String>> testLocation(
-            @RequestParam(required = false) String ip,
-            HttpServletRequest request) {
-
+    public ResponseEntity<Map<String, String>> testLocation(@RequestParam(required = false) String ip, HttpServletRequest request) {
         try {
             String testIp = (ip != null && !ip.isEmpty()) ? ip : getClientIp(request);
             String region = qrCodeService.testRegionDetection(testIp);
@@ -235,7 +176,6 @@ public class QRController {
 
             log.info("Test location for IP: {} -> Region: {}", testIp, region);
             return ResponseEntity.ok(result);
-
         } catch (Exception e) {
             log.error("Error testing location", e);
             Map<String, String> error = new HashMap<>();
@@ -244,10 +184,6 @@ public class QRController {
         }
     }
 
-    /**
-     * Health check endpoint
-     * GET /api/qr/health
-     */
     @GetMapping("/health")
     public ResponseEntity<Map<String, Object>> health() {
         Map<String, Object> health = new HashMap<>();
@@ -258,27 +194,18 @@ public class QRController {
         return ResponseEntity.ok(health);
     }
 
-    // ============= HELPER METHODS =============
 
-    /**
-     * Extract client IP from request
-     */
     private String getClientIp(HttpServletRequest request) {
         String ipAddress = request.getHeader("X-Forwarded-For");
 
-        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
+        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress))
             ipAddress = request.getHeader("X-Real-IP");
-        }
 
-        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
+        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress))
             ipAddress = request.getRemoteAddr();
-        }
 
-        // Handle multiple IPs (take the first one)
-        if (ipAddress != null && ipAddress.contains(",")) {
+        if (ipAddress != null && ipAddress.contains(","))
             ipAddress = ipAddress.split(",")[0].trim();
-        }
-
         return ipAddress;
     }
 }
