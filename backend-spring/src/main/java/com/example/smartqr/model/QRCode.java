@@ -9,15 +9,17 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity
-@Table
+@Table(name = "qr_codes")
 public class QRCode {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(columnDefinition = "UNIQUEIDENTIFIER")
     private UUID id;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = false, columnDefinition = "NVARCHAR(MAX)")
     private String data;
 
-    @Column(name = "image_url", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "image_url", nullable = false, columnDefinition = "NVARCHAR(500)")
     private String imageUrl;
 
     @Column(name = "name", length = 100)
@@ -33,13 +35,9 @@ public class QRCode {
 
     @PrePersist
     protected void onCreate() {
-        if (createdAt == null) {
-            createdAt = LocalDateTime.now();
-        }
-        // Auto-generate name if not provided
-        if (name == null || name.isEmpty()) {
-            name = generateNameFromData();
-        }
+        if (createdAt == null) createdAt = LocalDateTime.now();
+        if (id == null) id = UUID.randomUUID();
+        if (name == null || name.isEmpty()) name = generateNameFromData();
     }
 
     private String generateNameFromData() {

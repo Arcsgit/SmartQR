@@ -1,79 +1,14 @@
-// import { Injectable, inject } from '@angular/core';
-// import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-// import { Observable, throwError } from 'rxjs';
-// import { catchError } from 'rxjs/operators';
-// import { environment } from '../../environments/environment';
-// import { 
-//   QRCode, 
-//   QRGenerateRequest, 
-//   QRGenerateResponse, 
-//   QRUpdateRequest,
-//   ApiResponse 
-// } from '../models/qr-code.model';
-// import { AnalyticsResponse } from '../models/analytics.model';
-
-// @Injectable({
-//   providedIn: 'root'
-// })
-// export class QrCodeService {
-//   private http = inject(HttpClient);
-//   private apiUrl = environment.apiUrl;
-
-//   generateQR(request: QRGenerateRequest): Observable<ApiResponse<QRGenerateResponse>> {
-//     return this.http.post<ApiResponse<QRGenerateResponse>>(
-//       `${this.apiUrl}/qr/generate`, 
-//       request
-//     ).pipe(catchError(this.handleError));
-//   }
-
-//   updateQR(id: string, request: QRUpdateRequest): Observable<ApiResponse<string>> {
-//     return this.http.post<ApiResponse<string>>(
-//       `${this.apiUrl}/qr/update/${id}`, 
-//       request
-//     ).pipe(catchError(this.handleError));
-//   }
-
-//   getAllQRCodes(): Observable<ApiResponse<QRCode[]>> {
-//     return this.http.get<ApiResponse<QRCode[]>>(
-//       `${this.apiUrl}/qr/all`
-//     ).pipe(catchError(this.handleError));
-//   }
-
-//   getQRCode(id: string): Observable<ApiResponse<QRCode>> {
-//     return this.http.get<ApiResponse<QRCode>>(
-//       `${this.apiUrl}/qr/${id}`
-//     ).pipe(catchError(this.handleError));
-//   }
-
-//   getAnalytics(id: string): Observable<ApiResponse<AnalyticsResponse>> {
-//     return this.http.get<ApiResponse<AnalyticsResponse>>(
-//       `${this.apiUrl}/qr/analytics/${id}`
-//     ).pipe(catchError(this.handleError));
-//   }
-
-//   deleteQRCode(id: string): Observable<ApiResponse<string>> {
-//     return this.http.delete<ApiResponse<string>>(
-//       `${this.apiUrl}/qr/${id}`
-//     ).pipe(catchError(this.handleError));
-//   }
-
-//   private handleError(error: HttpErrorResponse) {
-//     console.error('API Error:', error);
-//     return throwError(() => error);
-//   }
-// }
-
 import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../environments/environment';
-import { 
-  ApiResponse, 
-  QRCode, 
-  QRGenerateRequest, 
-  QRGenerateResponse, 
-  QRUpdateRequest 
+import {
+  ApiResponse,
+  QRCode,
+  QRGenerateRequest,
+  QRGenerateResponse,
+  QRUpdateRequest
 } from '../models/qr-code.model';
 import { AnalyticsResponse } from '../models/analytics.model';
 
@@ -153,7 +88,7 @@ export class QrCodeService {
     if (!isPlatformBrowser(this.platformId)) {
       return new Map();
     }
-    
+
     try {
       const names = localStorage.getItem('qr_names');
       if (names) {
@@ -169,7 +104,7 @@ export class QrCodeService {
     if (!isPlatformBrowser(this.platformId)) {
       return;
     }
-    
+
     try {
       localStorage.setItem('qr_names', JSON.stringify(Array.from(names.entries())));
     } catch (error) {
@@ -211,7 +146,7 @@ export class QrCodeService {
       const urlObj = new URL(url);
       const domain = urlObj.hostname.replace('www.', '');
       const path = urlObj.pathname.split('/').filter(p => p).join(' ');
-      
+
       if (path) {
         return `${domain} - ${path.substring(0, 20)}`;
       }
