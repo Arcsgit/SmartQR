@@ -13,14 +13,13 @@ import java.util.UUID;
 @Table(name = "users")
 public class User implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(columnDefinition = "UNIQUEIDENTIFIER")
+    @GeneratedValue(strategy = GenerationType.UUID)  // ← CHANGED back to UUID
     private UUID id;
 
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(nullable = false, columnDefinition = "NVARCHAR(500)")
+    @Column(nullable = false)  // ← REMOVED columnDefinition
     private String password;
 
     @Column(nullable = false)
@@ -103,8 +102,7 @@ public class User implements UserDetails {
 
     @PrePersist
     protected void onCreate() {
-        if (createdAt == null) createdAt = LocalDateTime.now();
-        if (id == null) id = UUID.randomUUID();
+        createdAt = LocalDateTime.now();
     }
 
     @Override

@@ -13,13 +13,13 @@ public class QRAnalytics {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "qr_id", nullable = false, columnDefinition = "UNIQUEIDENTIFIER")
+    @Column(name = "qr_id", nullable = false)  // ← REMOVED columnDefinition
     private UUID qrId;
 
     @Column(nullable = false)
     private LocalDateTime timestamp;
 
-    @Column(name = "device_info", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "device_info", columnDefinition = "TEXT")  // ← CHANGED back to TEXT
     private String deviceInfo;
 
     @Column(name = "ip_address")
@@ -30,9 +30,7 @@ public class QRAnalytics {
 
     @PrePersist
     protected void onCreate() {
-        if (timestamp == null) {
-            timestamp = LocalDateTime.now();
-        }
+        timestamp = LocalDateTime.now();
     }
 
     public QRAnalytics() {

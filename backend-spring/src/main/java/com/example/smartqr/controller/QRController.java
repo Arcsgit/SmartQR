@@ -7,6 +7,7 @@ import com.example.smartqr.service.QRCodeService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -26,16 +27,14 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/qr")
-@CrossOrigin(origins = {"*"},
+@CrossOrigin(origins = {"https://smartqr-code.onrender.com"},
              allowedHeaders = "*",
              methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
 public class QRController {
     private static final Logger log = LoggerFactory.getLogger(QRController.class);
-    private final QRCodeService qrCodeService;
 
-    public QRController(QRCodeService qrCodeService) {
-        this.qrCodeService = qrCodeService;
-    }
+    @Autowired
+    private QRCodeService qrCodeService;
 
     @PostMapping("/generate")
     public ResponseEntity<ApiResponse<QRGenerateResponse>> generateQR(@Valid @RequestBody QRGenerateRequest request) {

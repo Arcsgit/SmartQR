@@ -43,7 +43,7 @@ public class QRCodeService {
     private final UserRepository userRepository;
     private final S3Service s3Service;
 
-    @Value("${app.base-url:http://localhost:8080}")
+    @Value("${app.base-url}")
     private String baseUrl;
 
     @Value("${ipinfo.token:}")

@@ -17,8 +17,8 @@ public class WebConfig implements WebMvcConfigurer {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.setAllowedOrigins(Arrays.asList(
-                "*",
-                "http://localhost:4200"
+                "http://localhost:4200",
+                "https://smartqr-code.onrender.com"
         ));
         corsConfiguration.setAllowedHeaders(Arrays.asList(
             "Origin",
