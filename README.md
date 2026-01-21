@@ -75,7 +75,7 @@ Built with Angular, Spring Boot, and deployed on AWS infrastructure.
 ---
 ## INSTALLATION & SETUP
 ### Backend Setup (Spring Boot)
-1. Clone the repository:
+1. Clone the repository:  
 	`git clone https://github.com/Arcsgit/SmartQR`  
 	`cd smartqr/backend`
 2. Create a .env file in backend root:  
@@ -86,26 +86,25 @@ Built with Angular, Spring Boot, and deployed on AWS infrastructure.
 	`java -jar target/smartqr-0.0.1-SNAPSHOT.jar`
 5. Backend will start on: http://localhost:8080
 ### Frontend Setup (Angular)
-1. Navigate to frontend directory:
+1. Navigate to frontend directory:  
 	`cd smartqr/frontend`
-2. Install dependencies:
+2. Install dependencies:  
 	`npm install`
-3. Run development server:
+3. Run development server:  
 	`ng serve`
 4. Open browser: http://localhost:4200
 
 ---
 ## SCREENSHOTS
 
-1. Landing Page / Login
+1. Landing Page  
+![Landing Page](landing_page.png)
 
 2. QR Code Generation
 
 3. QR Code Management Dashboard
 
 4. Analytics Dashboard
-
-5. Mobile Responsive View
 
 ---
 ## CONTACT
@@ -114,6 +113,6 @@ Built with Angular, Spring Boot, and deployed on AWS infrastructure.
 ###### LinkedIn:[ linkedin.com/in/architrshet](https://linkedin.com/in/architrshet)
 ###### GitHub: [github.com/Arcsgit](https://github.com/Arcsgit)
 
-Built with ❤️ by ==Archit Shet==
+Built by [Archit Shet]
 
 January 2026
