@@ -1,0 +1,132 @@
+name: Deploy to EC2
+
+on:
+  workflow_run:
+    workflows: ["Build & Publish Images"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            
+            echo "Starting deployment..."
+            cd /opt/app
+            
+            # Update IMAGE_TAG in .env
+            sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=${{ github.sha }}/" .env
+            
+            # Update database credentials from secrets (in case they changed)
+            sed -i "s/^DB_NAME=.*/DB_NAME=${{ secrets.DB_NAME }}/" .env
+            sed -i "s/^DB_USER=.*/DB_USER=${{ secrets.DB_USER }}/" .env
+            sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=${{ secrets.DB_PASSWORD }}/" .env
+            
+            echo "✓ Updated environment variables"
+            
+            # Login to Docker Hub
+            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+            
+            # Pull latest images
+            echo "Pulling new Docker images..."
+            docker-compose -f infra/docker-compose.prod.yml --env-file .env pull
+            
+            # Stop old containers (keep postgres data!)
+            echo "Stopping old containers..."
+            docker-compose -f infra/docker-compose.prod.yml down
+            
+            # Start all services including PostgreSQL
+            echo "Starting all containers..."
+            docker-compose -f infra/docker-compose.prod.yml --env-file .env up -d
+            
+            # Wait for database to be ready
+            echo "Waiting for PostgreSQL to be ready..."
+            sleep 20
+            
+            # Wait for backend to start
+            echo "Waiting for backend to start..."
+            sleep 30
+            
+            # Check container status
+            echo "Container status:"
+            docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+            
+            # Health checks
+            echo "Running health checks..."
+            
+            # Check PostgreSQL
+            docker exec postgres-db pg_isready -U ${{ secrets.DB_USER }} -d ${{ secrets.DB_NAME }} || {
+              echo "PostgreSQL health check failed"
+              docker logs postgres-db --tail 50
+              exit 1
+            }
+            echo "PostgreSQL is ready"
+            
+            # Check Backend
+            curl -f http://localhost/api/actuator/health || {
+              echo "Backend health check failed"
+              docker logs backend --tail 50
+              exit 1
+            }
+            echo "Backend is healthy"
+            
+            # Check Frontend
+            curl -f http://localhost/ || {
+              echo "Frontend health check failed"
+              docker logs frontend --tail 50
+              exit 1
+            }
+            echo "Frontend is healthy"
+            
+            # Cleanup old images
+            echo "Cleaning up old images..."
+            docker system prune -af --filter "until=72h"
+            
+            echo "Deployment completed successfully!"
+
+      - name: Verify deployment
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "Verifying deployment..."
+            
+            # Show all containers
+            docker ps
+            
+            # Show volume usage
+            docker volume ls
+            
+            # Check database connections
+            docker exec postgres-db psql -U ${{ secrets.DB_USER }} -d ${{ secrets.DB_NAME }} -c "SELECT count(*) FROM pg_stat_activity;"
+            
+            echo "Verification complete!"
+
+      - name: Deployment summary
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "Deployment successful!"
+            echo "Frontend: https://${{ secrets.DOMAIN }}"
+            echo "Backend API: https://${{ secrets.DOMAIN }}/api"
+            echo "Database: Running on same instance (internal)"
+            echo "Image tag: ${{ github.sha }}"
+          else
+            echo "Deployment failed!"
+          fi

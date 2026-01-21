@@ -1,0 +1,31 @@
+<div class="container">
+  <div class="hero">
+    <h1>Smart QR Code Management</h1>
+    <p>Generate, manage, and track QR codes with powerful analytics. Built for businesses and individuals who need reliable QR code solutions.</p>
+    <div class="buttons">
+      @if (authService.isAuthenticated()) {
+        <a routerLink="/generate" class="btn btn-primary">Generate QR Code</a>
+        <a routerLink="/manage" class="btn btn-secondary">View QR Codes</a>
+      } @else {
+        <a routerLink="/signup" class="btn btn-primary">Get Started Free</a>
+      }
+    </div>
+  </div>
+
+  <div class="features">
+    @for (feature of features; track feature.title) {
+      <div class="feature-card">
+        <h3>{{feature.title}}</h3>
+        <p>{{feature.description}}</p>
+      </div>
+    }
+  </div>
+
+  @if (!authService.isAuthenticated()) {
+    <div class="cta">
+      <h2>Ready to get started?</h2>
+      <p>Create your account and start generating QR codes in seconds.</p>
+      <a routerLink="/signup" class="btn btn-primary">Create Free Account</a>
+    </div>
+  }
+</div>

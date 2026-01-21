@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Build output
+dist/
+.angular/
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.idea
+.vscode
+*.iml
+
+# Environment
+.env
+.env.*
+
+# Documentation
+README.md
+docs/
+
+# Tests
+e2e/
+*.spec.ts
+src/**/*.spec.ts
+
+# OS
+.DS_Store
+Thumbs.db
+
+# CI/CD
+.github/
+
+# Misc
+coverage/
+.nyc_output/

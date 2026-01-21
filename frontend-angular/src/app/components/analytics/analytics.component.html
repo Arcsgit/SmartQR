@@ -1,0 +1,208 @@
+<div class="container">
+  <!-- Header Section -->
+  <div class="header">
+    <div class="header-content">
+      <a routerLink="/manage" class="back-link">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        Back to Manage
+      </a>
+      
+      @if (qrCode()) {
+        <div class="qr-info-header">
+          <h1>{{ getDisplayName() }}</h1>
+          <div class="destination-preview">
+            <span class="label">Destination:</span>
+            <div class="url-display">
+              <span class="url-text" [title]="qrCode()!.data">
+                {{ truncateUrl(qrCode()!.data) }}
+              </span>
+              <button 
+                (click)="copyUrl(qrCode()!.data)" 
+                class="copy-btn"
+                title="Copy URL"
+              >
+                <i class="fa-regular fa-copy"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <h1>QR Code Analytics</h1>
+      }
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Loading analytics...</p>
+    </div>
+  } @else if (analytics()) {
+    <!-- QR Code Preview Card -->
+    @if (qrCode()) {
+      <div class="qr-preview-card">
+        <div class="qr-image-section">
+          <img [src]="qrCode()!.imageUrl" alt="QR Code" class="qr-preview-image" />
+        </div>
+        <div class="qr-details">
+          <div class="detail-item">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+            </svg>
+            <div>
+              <span class="detail-label">Full URL</span>
+              <span class="detail-value">{{ qrCode()!.data }}</span>
+            </div>
+          </div>
+          <div class="detail-item">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <div>
+              <span class="detail-label">Created</span>
+              <span class="detail-value">{{ formatDate(qrCode()!.createdAt) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon blue">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <p class="stat-label">Total Scans</p>
+          <p class="stat-value">{{ analytics()!.scanCount }}</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon green">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <p class="stat-label">Unique Visitors</p>
+          <p class="stat-value">{{ analytics()!.uniqueIps }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart Section -->
+    <div class="chart-card">
+      <h2>Scan Trends</h2>
+      <p class="chart-description">Daily scan activity over time</p>
+      <div class="chart-container">
+        <canvas baseChart
+          [data]="lineChartData"
+          [options]="lineChartOptions"
+          type="line">
+        </canvas>
+      </div>
+    </div>
+
+    <!-- Device Stats -->
+    <div class="device-stats-card">
+      <h2>Device Distribution</h2>
+      <p class="chart-description">Scans by device type</p>
+      @if (getDeviceStatsArray().length > 0) {
+        <div class="device-list">
+          @for (stat of getDeviceStatsArray(); track stat.device) {
+            <div class="device-item">
+              <div class="device-info">
+                <span class="device-icon">{{ getDeviceIcon(stat.device) }}</span>
+                <span class="device-name">{{ stat.device }}</span>
+              </div>
+              <div class="device-bar-container">
+                <div class="device-bar">
+                  <div 
+                    class="device-bar-fill" 
+                    [style.width.%]="getDevicePercentage(stat.count)"
+                  ></div>
+                </div>
+                <span class="device-count">{{ stat.count }} ({{ getDevicePercentage(stat.count) | number:'1.0-0' }}%)</span>
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="empty-state">
+          <p>No device data available yet</p>
+        </div>
+      }
+    </div>
+
+    <!-- Recent Scans -->
+    <div class="scans-card">
+      <h2>Recent Scans</h2>
+      <p class="chart-description">Latest scan activity</p>
+      @if (analytics()!.scans.length > 0) {
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Location</th>
+                <th>Device</th>
+                <th>IP Address</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (scan of analytics()!.scans; track scan.id) {
+                <tr>
+                  <td>
+                    <span class="time-badge">{{ formatDateShort(scan.timestamp) }}</span>
+                  </td>
+                  <td>
+                    <span class="location-badge">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                      </svg>
+                      {{ scan.region }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="device-badge">{{ scan.deviceInfo | slice:0:40 }}...</span>
+                  </td>
+                  <td>
+                    <code class="ip-code">{{ scan.ipAddress }}</code>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <div class="empty-state">
+          <p>No scans recorded yet</p>
+        </div>
+      }
+    </div>
+  } @else {
+    <!-- Empty State -->
+    <div class="empty">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <h2>No Analytics Data</h2>
+      <p>Analytics data will appear here once your QR code is scanned</p>
+      <a routerLink="/manage" class="btn btn-primary">Back to Manage</a>
+    </div>
+  }
+</div>

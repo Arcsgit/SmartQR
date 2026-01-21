@@ -1,0 +1,49 @@
+<nav class="navbar">
+      <div class="container">
+        <a routerLink="/" class="logo">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="7" height="7" rx="1"/>
+          </svg>
+          <span>SmartQR</span>
+        </a>
+
+        <div class="nav-links">
+          @if (authService.isAuthenticated()) {
+            <a routerLink="/generate" routerLinkActive="active">Generate</a>
+            <a routerLink="/manage" routerLinkActive="active">Manage</a>
+            
+            <div class="user-menu">
+              <button class="user-button" (click)="toggleUserMenu()">
+                <span class="user-avatar">{{ getUserInitials() }}</span>
+                <span class="user-name">{{ getCurrentUserName() }}</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
+              </button>
+              
+              @if (showUserMenu) {
+                <div class="dropdown-menu">
+                  <div class="dropdown-header">
+                    <p class="user-email">{{ getCurrentUserEmail() }}</p>
+                  </div>
+                  <button (click)="logout()" class="dropdown-item logout">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                      <polyline points="16 17 21 12 16 7"/>
+                      <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                    Logout
+                  </button>
+                </div>
+              }
+            </div>
+          } @else {
+            <a routerLink="/login" routerLinkActive="active">Login</a>
+            <a routerLink="/signup" routerLinkActive="active" class="btn-signup">Sign Up</a>
+          }
+        </div>
+      </div>
+    </nav>

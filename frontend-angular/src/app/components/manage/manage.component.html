@@ -1,0 +1,155 @@
+<div class="container">
+  <div class="header">
+    <div>
+      <h1>Manage QR Codes</h1>
+      <p>View, edit and manage your QR codes</p>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Loading your QR codes...</p>
+    </div>
+  } @else if (qrCodes().length === 0) {
+    <div class="empty">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="3" y="3" width="7" height="7" rx="1"/>
+        <rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/>
+        <rect x="14" y="14" width="7" height="7" rx="1"/>
+      </svg>
+      <h2>No QR Codes Yet</h2>
+      <p>Create your first QR code to get started!</p>
+      <a routerLink="/generate" class="btn btn-primary">Generate QR Code</a>
+    </div>
+  } @else {
+    <div class="grid">
+      @for (qr of qrCodes(); track qr.id) {
+        <div class="card">
+          <div class="qr-image">
+            <img [src]="qr.imageUrl" [alt]="getDisplayName(qr)" />
+          </div>
+
+          <div class="content">
+            <h3 class="qr-title">{{ getDisplayName(qr) }}</h3>
+
+            @if (editingId() === qr.id) {
+              <div class="edit-form">
+                <div class="form-group">
+                  <label>Name (Optional)</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="editName"
+                    class="form-input"
+                    placeholder="e.g., Product Page, Contact Card"
+                    maxlength="100"
+                  />
+                </div>
+                <div class="form-group">
+                  <label>Destination URL</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="editData"
+                    class="form-input"
+                    placeholder="https://example.com"
+                    required
+                  />
+                </div>
+                <div class="edit-buttons">
+                  <button (click)="saveEdit(qr.id)" class="btn btn-success">
+                    Save Changes
+                  </button>
+                  <button (click)="cancelEdit()" class="btn btn-secondary">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            } @else {
+              <div class="field">
+                <label>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7" rx="1"/>
+                    <rect x="14" y="3" width="7" height="7" rx="1"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1"/>
+                    <rect x="14" y="14" width="7" height="7" rx="1"/>
+                  </svg>
+                  Scan URL:
+                </label>
+                <div class="url-container scan-url-container">
+                  <p class="url-value scan-url-value" [title]="getScanUrl(qr.id)">
+                    {{ truncateUrl(getScanUrl(qr.id), 45) }}
+                  </p>
+                  <button (click)="copyScanUrl(qr.id)" class="copy-btn" title="Copy scan URL">
+                    <i class="fa-regular fa-copy"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="field">
+                <label>Created:</label>
+                <p class="value">{{ formatDate(qr.createdAt) }}</p>
+              </div>
+
+              <div class="actions-new">
+                <a [routerLink]="['/analytics', qr.id]" class="btn btn-analytics">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                  </svg>
+                  View Analytics
+                </a>
+                
+                <div class="actions-row">
+                  <button (click)="startEdit(qr)" class="btn btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    Edit
+                  </button>
+                  
+                  <button 
+                    (click)="downloadQR(qr)" 
+                    class="btn btn-success"
+                    [disabled]="isDownloading(qr.id)"
+                  >
+                    @if (isDownloading(qr.id)) {
+                      <svg class="spinner-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                      </svg>
+                    } @else {
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                      </svg>
+                      Download
+                    }
+                  </button>
+                  
+                  <button 
+                    (click)="deleteQR(qr.id)" 
+                    class="btn btn-danger"
+                    [disabled]="isDeleting(qr.id)"
+                  >
+                    @if (isDeleting(qr.id)) {
+                      <svg class="spinner-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                      </svg>
+                    } @else {
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                      </svg>
+                      Delete
+                    }
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
