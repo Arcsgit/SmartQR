@@ -98,13 +98,16 @@ Built with Angular, Spring Boot, and deployed on AWS infrastructure.
 ## SCREENSHOTS
 
 1. Landing Page  
-![Landing Page](landing_page.png)
+![Landing Page](screenshots/landing_page.png)
 
-2. QR Code Generation
+2. QR Code Generation  
+![Generation Page](screenshots/generation.png)
 
-3. QR Code Management Dashboard
+3. QR Code Management Dashboard  
+![Dashboard Page](screenshots/management-dashboard.png)
 
-4. Analytics Dashboard
+4. Analytics Dashboard  
+![Analytics Page](screenshots/analytics.png)
 
 ---
 ## CONTACT
