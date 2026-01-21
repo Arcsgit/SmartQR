@@ -1,6 +1,6 @@
 # SmartQR
 
-==QR Code Management Platform with real-time analytics==
+####**QR Code Management Platform with real-time analytics**
 
 Live Demo: [smartqr-code.site](https://smartqr-code.site)
 
@@ -19,7 +19,7 @@ Built with Angular, Spring Boot, and deployed on AWS infrastructure.
 ---  
 ## FEATURES
 
-##### Core Features:
+### Core Features:
 - User Authentication (Signup/Login with JWT)
 - Dynamic QR Code Generation
 - QR Code Management (Edit, Delete, Download)
@@ -28,7 +28,7 @@ Built with Angular, Spring Boot, and deployed on AWS infrastructure.
 - Device Information Analytics
 - Interactive Dashboard with Charts
 - Responsive Design (Mobile & Desktop)
-##### Analytics Features:
+### Analytics Features:
 - Total scan count
 - Scan timeline charts
 - Device breakdown (Mobile/Desktop)
@@ -38,24 +38,24 @@ Built with Angular, Spring Boot, and deployed on AWS infrastructure.
 ---
 ## TECHNOLOGY STACK
 
-##### Frontend :
+### Frontend :
 - Angular Framework
 - Pure HTML & CSS
 - Chart.js
 - RxJS
 - ngx-toastr
-##### Backend :
+### Backend :
 - Spring Boot 3.x
 - Java 21
 - Spring Security
 - JWT Authentication
 - Spring Data JPA
-##### Database :
+### Database :
 - PostgreSQL (EC2 Instance)
-##### Cloud Services:
+### Cloud Services:
 - AWS EC2 (Backend, Frontend Hosting, PostgreSQL)
 - AWS S3 (QR Image Storage)
-##### Tools & Libraries:
+### Tools & Libraries:
 - Maven
 - ZXing (QR Code Generation)
 - IPInfo API (Geolocation)
