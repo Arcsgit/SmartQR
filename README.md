@@ -1,6 +1,6 @@
 # SmartQR
 
-####**QR Code Management Platform with real-time analytics**
+**QR Code Management Platform with real-time analytics**
 
 Live Demo: [smartqr-code.site](https://smartqr-code.site)
 
@@ -76,13 +76,13 @@ Built with Angular, Spring Boot, and deployed on AWS infrastructure.
 ## INSTALLATION & SETUP
 ### Backend Setup (Spring Boot)
 1. Clone the repository:
-	`git clone https://github.com/Arcsgit/SmartQR
+	`git clone https://github.com/Arcsgit/SmartQR`  
 	`cd smartqr/backend`
-2. Create a .env file in backend root: 
+2. Create a .env file in backend root:  
 	`touch .env`
-3. Build the project:
+3. Build the project:  
 	`mvn clean package -DskipTests`
-4. Run locally:
+4. Run locally:  
 	`java -jar target/smartqr-0.0.1-SNAPSHOT.jar`
 5. Backend will start on: http://localhost:8080
 ### Frontend Setup (Angular)
